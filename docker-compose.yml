@@ -10,6 +10,7 @@ services:
       POSTGRES_DB: vial
     ports:
       - 5432:5432
+
   nodeserver:
     container_name: vial-backend-b-api
     image: node:18.15.0

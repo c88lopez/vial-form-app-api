@@ -4,7 +4,7 @@ import { FastifyInstance } from 'fastify'
 
 const server: FastifyInstance = build({
   logger: {
-    level: 'error',
+    level: process.env.LOG_LEVEL ?? 'error',
   },
 })
 
@@ -14,7 +14,7 @@ server.register(CORSConfig, {
 })
 
 server
-  .listen({ port: 8080, host: '0.0.0.0' })
+  .listen({ port: Number(process.env.PORT ?? 8080), host: '0.0.0.0' })
   .then(address => {
     console.log(`Server listening at ${address}`)
   })
