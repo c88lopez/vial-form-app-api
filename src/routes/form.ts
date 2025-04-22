@@ -6,7 +6,7 @@ import prisma from '../db/db_client'
 import { serializer } from './middleware/pre_serializer'
 import { IEntityId } from './schemas/common'
 import { ApiError } from '../errors'
-import { IForm } from './schemas/form'
+import { IForm, IFormRecord } from './schemas/form'
 
 async function formRoutes(app: FastifyInstance) {
   app.setReplySerializer(serializer)
@@ -68,6 +68,67 @@ async function formRoutes(app: FastifyInstance) {
       } catch (err: any) {
         log.error({ err }, err.message)
         throw new ApiError('failed to fetch form', 400)
+      }
+    },
+  })
+
+  const validateRequiredFields = (
+    formFields: Form['fields'],
+    newRecord: any
+  ) => {
+    const fields = formFields as unknown as IForm['fields']
+    const fieldsKeys = Object.keys(fields)
+    for (let index = 0; index < fieldsKeys.length; index++) {
+      if (fields[index] && !fields[index].required) {
+        continue
+      }
+
+      if (!newRecord.answers[fieldsKeys[index]]) {
+        throw new Error(`Expected answer for field "${fieldsKeys[index]}"`)
+      }
+    }
+  }
+
+  app.post<{
+    Params: IEntityId
+    Body: IFormRecord
+    Reply: IForm
+  }>('/:id/create-record', {
+    async handler(req, reply) {
+      const { params, body } = req
+      log.debug('create form data record', { params, body })
+      try {
+        const form = await prisma.form.findUniqueOrThrow({
+          where: {
+            id: params.id,
+          },
+        })
+
+        validateRequiredFields(form.fields, body)
+
+        await prisma.$transaction(async tx => {
+          const sourceRecord = await tx.sourceRecord.create({
+            data: {
+              formId: form.id,
+            },
+          })
+
+          const fields = form.fields as unknown as IForm['fields']
+          const fieldsKeys = Object.keys(fields)
+
+          return tx.sourceData.createMany({
+            data: fieldsKeys.map(fieldKey => {
+              return {
+                sourceRecordId: sourceRecord.id,
+                question: fields[fieldKey].question,
+                answer: body.answers[fieldKey],
+              }
+            }),
+          })
+        })
+      } catch (err: any) {
+        log.error({ err }, err.message)
+        throw new ApiError('failed to create form record', 400)
       }
     },
   })

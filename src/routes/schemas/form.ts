@@ -17,3 +17,9 @@ export const Form = Type.Object({
 })
 
 export type IForm = Static<typeof Form>
+
+export const FormRecord = Type.Object({
+  answers: Type.Record(Type.String(), Type.String()),
+})
+
+export type IFormRecord = Static<typeof FormRecord>
