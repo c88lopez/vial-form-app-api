@@ -13,6 +13,21 @@ async function formRoutes(app: FastifyInstance) {
   const log = app.log.child({ component: 'formRoutes' })
 
   app.get<{
+    Reply: Form[]
+  }>('/', {
+    async handler(req, reply) {
+      log.debug('get forms')
+      try {
+        const forms = await prisma.form.findMany()
+        reply.send(forms)
+      } catch (err: any) {
+        log.error({ err }, err.message)
+        throw new ApiError('failed to fetch form', 400)
+      }
+    },
+  })
+
+  app.get<{
     Params: IEntityId
     Reply: Form
   }>('/:id', {
