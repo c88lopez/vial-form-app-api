@@ -110,7 +110,7 @@ async function formRoutes(app: FastifyInstance) {
     const fields = formFields as unknown as IForm['fields']
     const fieldsKeys = Object.keys(fields)
     for (let index = 0; index < fieldsKeys.length; index++) {
-      if (fields[index] && !fields[index].required) {
+      if (fields[fieldsKeys[index]] && !fields[fieldsKeys[index]].required) {
         continue
       }
 
@@ -152,7 +152,7 @@ async function formRoutes(app: FastifyInstance) {
               return {
                 sourceRecordId: sourceRecord.id,
                 question: fields[fieldKey].question,
-                answer: body.answers[fieldKey],
+                answer: body.answers[fieldKey] ?? '',
               }
             }),
           })
