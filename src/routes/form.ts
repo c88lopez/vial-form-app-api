@@ -49,6 +49,28 @@ async function formRoutes(app: FastifyInstance) {
     },
   })
 
+  app.get<{
+    Params: IEntityId
+    // Reply: IForm
+  }>('/:id/record', {
+    async handler(req, reply) {
+      const { params } = req
+      const { id } = params
+      log.debug('get form by id')
+      try {
+        const records = await prisma.sourceRecord.findMany({
+          where: { formId: id },
+          include: { sourceData: true },
+        })
+
+        reply.send(records)
+      } catch (err: any) {
+        log.error({ err }, err.message)
+        throw new ApiError('failed to fetch form', 400)
+      }
+    },
+  })
+
   app.post<{
     Body: IForm
     Reply: IForm
