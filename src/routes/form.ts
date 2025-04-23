@@ -63,7 +63,14 @@ async function formRoutes(app: FastifyInstance) {
           include: { sourceData: true },
         })
 
-        reply.send(records)
+        const response = records.map(record => ({
+          source_data: record.sourceData.map(data => ({
+            question: data.question,
+            answer: data.answer,
+          })),
+        }))
+
+        reply.send(response)
       } catch (err: any) {
         log.error({ err }, err.message)
         throw new ApiError('failed to fetch form', 400)
