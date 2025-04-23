@@ -55,7 +55,9 @@ async function formRoutes(app: FastifyInstance) {
   }>('/', {
     async handler(req, reply) {
       const { body } = req
-      log.debug('create form', { body })
+      log.debug('create form')
+      log.debug({ body })
+
       try {
         const form = await prisma.form.create({
           data: { name: body.name, fields: body.fields },
@@ -67,7 +69,7 @@ async function formRoutes(app: FastifyInstance) {
         })
       } catch (err: any) {
         log.error({ err }, err.message)
-        throw new ApiError('failed to fetch form', 400)
+        throw new ApiError('failed to create form', 400)
       }
     },
   })
