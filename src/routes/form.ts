@@ -95,10 +95,10 @@ async function formRoutes(app: FastifyInstance) {
     Params: IEntityId
     Body: IFormRecord
     Reply: IForm
-  }>('/:id/create-record', {
+  }>('/:id/add-record', {
     async handler(req, reply) {
       const { params, body } = req
-      log.debug('create form data record', { params, body })
+      log.debug('add form data record', { params, body })
       try {
         const form = await prisma.form.findUniqueOrThrow({
           where: {
