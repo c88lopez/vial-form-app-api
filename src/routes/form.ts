@@ -149,10 +149,16 @@ async function formRoutes(app: FastifyInstance) {
 
           return tx.sourceData.createMany({
             data: fieldsKeys.map(fieldKey => {
+              let answer = body.answers[fieldKey]
+
+              if (typeof body.answers[fieldKey] === 'boolean') {
+                answer = body.answers[fieldKey] ? 'yes' : 'no'
+              }
+
               return {
                 sourceRecordId: sourceRecord.id,
                 question: fields[fieldKey].question,
-                answer: body.answers[fieldKey] ?? '',
+                answer: answer ?? '',
               }
             }),
           })
